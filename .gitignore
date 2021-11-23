@@ -148,3 +148,4 @@ dmypy.json
 vk_config.v2.json
 
 # End of https://www.gitignore.io/api/python,visualstudiocode
+vk_config.v2.json
