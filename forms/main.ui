@@ -42,7 +42,7 @@
        <enum>Qt::SolidLine</enum>
       </property>
       <property name="columnCount">
-       <number>3</number>
+       <number>5</number>
       </property>
       <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
        <bool>false</bool>
@@ -50,6 +50,8 @@
       <attribute name="horizontalHeaderStretchLastSection">
        <bool>true</bool>
       </attribute>
+      <column/>
+      <column/>
       <column/>
       <column/>
       <column/>
