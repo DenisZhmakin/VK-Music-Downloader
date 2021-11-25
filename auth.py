@@ -21,7 +21,7 @@ class Auth(QMainWindow):
 
         self.com = Communicate()
 
-        self.ui = uic.loadUiType('forms/auth.ui')[0]()
+        self.ui = uic.loadUiType('designs/auth.ui')[0]()
         self.ui.setupUi(self)
 
         self.ui.auth_btn.clicked.connect(self.auth_btn_click)

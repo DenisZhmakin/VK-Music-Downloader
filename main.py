@@ -23,7 +23,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
 
-        self.ui = uic.loadUiType('forms/main.ui')[0]()
+        self.ui = uic.loadUiType('designs/main.ui')[0]()
         self.ui.setupUi(self)
 
         self.vkalbum = None
