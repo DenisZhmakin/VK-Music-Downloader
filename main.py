@@ -15,6 +15,7 @@ from PyQt5.QtWidgets import QHeaderView, QMainWindow, QTableWidgetItem
 
 from auth import Auth
 from entities.vk_album import VkAlbum
+from entities.vk_session import VkSession
 from vkdownloader import download_album
 
 
@@ -35,6 +36,10 @@ class MainWindow(QMainWindow):
             self.auth.com.authorized_successfull.connect(self.fill_album_tbl)
             self.auth.show()
         else:
+            with open(Path.home() / '.vkmusicload.conf', "r") as read_file:
+                data = json.load(read_file)
+            
+            VkSession().set_session(data['login'], password=['password'])
             self.fill_album_tbl()
         
         self.ui.load_btn.clicked.connect(self.load_btn_click)
@@ -55,28 +60,15 @@ class MainWindow(QMainWindow):
 
     def get_current_element(self, row):
         self.vkalbum = VkAlbum(
-            author=self.ui.album_lst.item(row, 0).text(),
-            title=self.ui.album_lst.item(row, 1).text(),
+            artist=self.ui.album_lst.item(row, 0).text().strip(),
+            title=self.ui.album_lst.item(row, 1).text().strip(),
             album_id=int(self.ui.album_lst.item(row, 2).text()),
             owner_id=int(self.ui.album_lst.item(row, 3).text()),
             access_hash=self.ui.album_lst.item(row, 4).text()
         )
         
     def fill_album_tbl(self):
-        with open(Path.home() / '.vkmusicload.conf', "r") as read_file:
-            data = json.load(read_file)
-        
-        vk_session = VkApi(
-            login=data['login'],
-            password=['password']
-        )
-
-        try:
-            vk_session.auth(token_only=True)
-        except AuthError as error_msg:
-            print(error_msg)
-            
-        vkaudio = VkAudio(vk_session)
+        vkaudio = VkAudio(VkSession().get_session())
 
         self.ui.album_lst.setRowCount(0)
 

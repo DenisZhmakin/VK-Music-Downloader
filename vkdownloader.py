@@ -4,26 +4,18 @@ from vk_api.audio import VkAudio
 from vk_api.exceptions import AuthError
 from vk_api.vk_api import VkApi
 from entities.vk_album import VkAlbum
+from entities.vk_session import VkSession
 
 
-def download_album(vk_album: VkAlbum):
-    with open(Path.home() / '.vkmusicload.conf', "r") as read_file:
-        data = json.load(read_file)
-    
-    vk_session = VkApi(
-        login=data['login'],
-        password=['password']
-    )
+def download_album(vk_album: VkAlbum):   
+    vkaudio = VkAudio(VkSession().get_session())
 
-    try:
-        vk_session.auth(token_only=True)
-    except AuthError as error_msg:
-        print(error_msg)
-            
-    vkaudio = VkAudio(vk_session)
+    tmp = Path.home() / "Музыка" / vk_album.artist.replace('/', '_') / vk_album.title
 
-    for track in vkaudio.get_iter(vk_album.owner_id, vk_album.album_id, vk_album.access_hash):
-        print(track)
+    tmp.mkdir(parents=True, exist_ok=True)
+
+    # for track in vkaudio.get_iter(vk_album.owner_id, vk_album.album_id, vk_album.access_hash):
+    #     print(track)
 
     
         

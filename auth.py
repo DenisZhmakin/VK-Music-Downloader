@@ -8,6 +8,8 @@ import os
 from PyQt5 import uic
 from PyQt5.QtWidgets import QMainWindow, QMessageBox
 
+from entities.vk_session import VkSession
+
 
 class Communicate(QObject):                                                 
     authorized_successfull = pyqtSignal()   
@@ -35,11 +37,9 @@ class Auth(QMainWindow):
             self.ui.password_line.clear()
             return
 
-        vk_session = vk_api.VkApi(login, password)
+        VkSession().set_session(login, password)
 
-        try:
-            vk_session.auth(token_only=True)
-
+        if VkSession().get_session is not None:
             user_data = {
                 "login": login,
                 "password": password
@@ -50,16 +50,19 @@ class Auth(QMainWindow):
             
             self.com.authorized_successfull.emit()
             self.close()
-        except vk_api.AuthError:
+        else:
+            self.ui.login_line.clear()
+            self.ui.password_line.clear()
+
             msgBox = QMessageBox()
 
             msgBox.setWindowTitle("Сообщение о ошибке")
             msgBox.setIcon(QMessageBox.Information)
-            msgBox.setText("Авторизация не удалась. Возможно, не правильный логи или пароль.")
+            msgBox.setText("Авторизация не удалась. Возможно, не правильный логин или пароль.")
 
             msgBox.exec()
             return
-            
+                      
     def validate_string(self, input_str: str, message: str) -> Optional[str]:
         if input_str and not input_str.isspace():
             return input_str.strip()
