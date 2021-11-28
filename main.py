@@ -4,8 +4,6 @@ import json
 
 from pathlib import Path
 from vk_api.audio import VkAudio
-from vk_api.exceptions import AuthError
-from vk_api.vk_api import VkApi
 
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
@@ -13,10 +11,10 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QHeaderView, QMainWindow, QTableWidgetItem
 
 
-from auth import Auth
+from forms.auth_form import Auth
 from entities.vk_album import VkAlbum
 from entities.vk_session import VkSession
-from vkdownloader import download_album
+from vkdownloader import VkDownloader
 
 
 class MainWindow(QMainWindow):
@@ -84,7 +82,8 @@ class MainWindow(QMainWindow):
         
     def load_btn_click(self):
         if self.vkalbum is not None:
-            download_album(self.vkalbum)
+            self.vk_downloader = VkDownloader(self.vkalbum)
+            self.vk_downloader.start()
 
 
 if __name__ == '__main__':
