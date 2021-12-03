@@ -1,14 +1,14 @@
 import os
 import random 
-import string 
+import string
+import requests
 
 from pathlib import Path
 from PyQt5.QtCore import QThread
-import requests
 from vk_api.audio import VkAudio
 
 from entities.vk_album import VkAlbum
-from entities.vk_session import VkSession
+from vk_session import VkSession
 from entities.vk_song import VkSong
 
 class VkDownloader(QThread):

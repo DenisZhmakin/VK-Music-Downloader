@@ -25,7 +25,7 @@
   <property name="windowTitle">
    <string notr="true">Авторизация Вконтакте</string>
   </property>
-  <widget class="QPushButton" name="auth_btn">
+  <widget class="QPushButton" name="auth_button">
    <property name="geometry">
     <rect>
      <x>10</x>

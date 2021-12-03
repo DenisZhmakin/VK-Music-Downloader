@@ -1,76 +1,78 @@
 import json
+
 from pathlib import Path
 from typing import Optional
-from PyQt5.QtCore import QObject, pyqtSignal
-
 from PyQt5 import uic
-from PyQt5.QtWidgets import QMainWindow, QMessageBox
+from vk_api.vk_api import VkApi
+from vk_session import VkSession
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QLineEdit, QMessageBox, QWidget
 
-from entities.vk_session import VkSession
 
-
-class Communicate(QObject):                                                 
-    authorized_successfull = pyqtSignal()   
+class AuthForm(QWidget):
+    authorized_successfull = pyqtSignal() 
     
-
-class Auth(QMainWindow):
     def __init__(self):
-        super(Auth, self).__init__()
+        QWidget.__init__(self)
+        uic.loadUi("designs/auth.ui", self)
 
-        self.com = Communicate()
-
-        self.ui = uic.loadUiType('designs/auth.ui')[0]()
-        self.ui.setupUi(self)
-
-        self.ui.auth_btn.clicked.connect(self.auth_btn_click)
-
-    def auth_btn_click(self):
+        self.auth_button.clicked.connect(self.auth_button_click)
+    
+    def auth_button_click(self):
         """ ЗАПОЛНИТЬ КОММЕНТ """
 
-        login = self.validate_string(self.ui.login_line.text(), "Поле логина пустое. Заполните его")
-        password = self.validate_string(self.ui.password_line.text(), "Поле пароля пустое. Заполните его")
-
-        if login is None or password is None:
-            self.ui.login_line.clear()
-            self.ui.password_line.clear()
+        if not self.validate_field(self.login_line):
+            self.print_message("Поле логина пустое. Заполните его")
             return
 
-        VkSession().set_session(login, password)
+        if not self.validate_field(self.password_line):
+            self.print_message("Поле пароля пустое. Заполните его")
+            return
 
-        if VkSession().get_session is not None:
+        session = VkApi(self.login_line.text(), self.password_line.text())
+
+        try:
+            session.auth(token_only=True)
+            auth_ok = True
+        except:
+            auth_ok = False
+
+        if auth_ok:
             user_data = {
-                "login": login,
-                "password": password
+                "login": self.login_line.text(),
+                "password": self.password_line.text()
             }
             
             with open(Path.home() / '.vkmusicload.conf', "w") as write_file:
                 json.dump(user_data, write_file)
             
-            self.com.authorized_successfull.emit()
+            self.authorized_successfull.emit()
             self.close()
         else:
-            self.ui.login_line.clear()
-            self.ui.password_line.clear()
+            self.login_line.clear()
+            self.password_line.clear()
+            
+            self.print_message(
+                "Авторизация не удалась.\nВозможно, не правильный логин или пароль."
+                )
+        
+    def validate_field(self, field: QLineEdit):
+        input_str = field.text()
 
-            msgBox = QMessageBox()
-
-            msgBox.setWindowTitle("Сообщение о ошибке")
-            msgBox.setIcon(QMessageBox.Information)
-            msgBox.setText("Авторизация не удалась. Возможно, не правильный логин или пароль.")
-
-            msgBox.exec()
-            return
-                      
-    def validate_string(self, input_str: str, message: str) -> Optional[str]:
         if input_str and not input_str.isspace():
-            return input_str.strip()
+            field.setText(input_str.strip())
+            return True
+        else:
+            field.clear()
+            return False
 
+    def print_message(self, message):
         msgBox = QMessageBox()
 
         msgBox.setWindowTitle("Сообщение о ошибке")
         msgBox.setIcon(QMessageBox.Information)
         msgBox.setText(message)
-
+        
         msgBox.exec()
-        return
+
         

@@ -25,7 +25,7 @@
   <property name="windowTitle">
    <string notr="true">Альбом</string>
   </property>
-  <widget class="QLineEdit" name="coverAlbum_lineEdit">
+  <widget class="QLineEdit" name="cover_line">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -35,7 +35,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="coverAlbum_button">
+  <widget class="QPushButton" name="cover_button">
    <property name="geometry">
     <rect>
      <x>380</x>
@@ -48,7 +48,7 @@
     <string>Выбрать</string>
    </property>
   </widget>
-  <widget class="QLabel" name="coverAlbum_label">
+  <widget class="QLabel" name="cover_label">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -61,7 +61,7 @@
     <string>Обложка альбома:</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="artistAlbum_lineEdit">
+  <widget class="QLineEdit" name="artist_line">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -84,7 +84,7 @@
     <string>Исполнитель альбома:</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="nameAlbum_lineEdit">
+  <widget class="QLineEdit" name="album_line">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -94,7 +94,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QLabel" name="albumname_label">
+  <widget class="QLabel" name="album_label">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -120,7 +120,7 @@
     <string>Жанр альбома:</string>
    </property>
   </widget>
-  <widget class="QLabel" name="yearAlbum_label">
+  <widget class="QLabel" name="year_label">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -133,7 +133,7 @@
     <string>Год выпуска альбома:</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="yearAlbum_lineEdit">
+  <widget class="QLineEdit" name="year_line">
    <property name="geometry">
     <rect>
      <x>10</x>
