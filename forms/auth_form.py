@@ -4,9 +4,10 @@ from pathlib import Path
 from typing import Optional
 from PyQt5 import uic
 from vk_api.vk_api import VkApi
+from utils import print_message, validate_QLineEdit
 from vk_session import VkSession
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QLineEdit, QMessageBox, QWidget
+from PyQt5.QtWidgets import QWidget
 
 
 class AuthForm(QWidget):
@@ -21,12 +22,12 @@ class AuthForm(QWidget):
     def auth_button_click(self):
         """ ЗАПОЛНИТЬ КОММЕНТ """
 
-        if not self.validate_field(self.login_line):
-            self.print_message("Поле логина пустое. Заполните его")
+        if not validate_QLineEdit(self.login_line):
+            print_message("Поле логина пустое. Заполните его")
             return
 
-        if not self.validate_field(self.password_line):
-            self.print_message("Поле пароля пустое. Заполните его")
+        if not validate_QLineEdit(self.password_line):
+            print_message("Поле пароля пустое. Заполните его")
             return
 
         session = VkApi(self.login_line.text(), self.password_line.text())
@@ -52,27 +53,6 @@ class AuthForm(QWidget):
             self.login_line.clear()
             self.password_line.clear()
             
-            self.print_message(
+            print_message(
                 "Авторизация не удалась.\nВозможно, не правильный логин или пароль."
                 )
-        
-    def validate_field(self, field: QLineEdit):
-        input_str = field.text()
-
-        if input_str and not input_str.isspace():
-            field.setText(input_str.strip())
-            return True
-        else:
-            field.clear()
-            return False
-
-    def print_message(self, message):
-        msgBox = QMessageBox()
-
-        msgBox.setWindowTitle("Сообщение о ошибке")
-        msgBox.setIcon(QMessageBox.Information)
-        msgBox.setText(message)
-        
-        msgBox.exec()
-
-        
