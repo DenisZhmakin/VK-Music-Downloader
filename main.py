@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import json
 from pathlib import Path
 
@@ -88,22 +89,21 @@ class MainWindow(QWidget):
             self.album_form.show()
 
     @pyqtSlot(dict)
-    def vk_album_handler(self, value):
-        print(value)        
-        # self.vk_downloader = VkDownloader(
-        #     VkAlbum(
-        #             artist=value['artist'],
-        #             title=value['title'],
-        #             cover=value['cover'],
-        #             genre=value['genre'],
-        #             year=value['year'],
-        #             album_id=value['album_id'],
-        #             owner_id=value['owner_id'],
-        #             access_hash=value['access_hash']
-        #         )
-        #     )
+    def vk_album_handler(self, value):     
+        self.vk_downloader = VkDownloader(
+            VkAlbum(
+                    artist=value['artist'],
+                    title=value['title'],
+                    cover=value['cover'],
+                    genre=value['genre'],
+                    year=value['year'],
+                    album_id=value['album_id'],
+                    owner_id=value['owner_id'],
+                    access_hash=value['access_hash']
+                )
+            )
         
-        # self.vk_downloader.start()
+        self.vk_downloader.start()
 
 if __name__ == "__main__":
     import sys

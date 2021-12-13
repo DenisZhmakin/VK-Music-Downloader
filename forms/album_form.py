@@ -57,3 +57,4 @@ class AlbumForm(QWidget):
         self.vk_album['year'] = int(self.year_line.text())
 
         self.finished.emit(self.vk_album)
+        self.close()
