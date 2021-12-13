@@ -1,13 +1,13 @@
 import json
 
 from pathlib import Path
-from typing import Optional
 from PyQt5 import uic
-from vk_api.vk_api import VkApi
-from utils import print_message, validate_QLineEdit
-from vk_session import VkSession
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget
+
+from vk_api.vk_api import VkApi
+
+from utils import print_message, validate_QLineEdit
 
 
 class AuthForm(QWidget):

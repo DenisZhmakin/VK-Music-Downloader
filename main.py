@@ -4,15 +4,16 @@ from pathlib import Path
 
 from PyQt5 import uic
 from PyQt5.QtCore import Qt, pyqtSlot
-from PyQt5.QtWidgets import (
-    QApplication, QHeaderView, QTableWidgetItem, QWidget)
+from PyQt5.QtWidgets import QApplication, QHeaderView, QTableWidgetItem, QWidget
 from vk_api.audio import VkAudio
+from utils import print_message
 
-from entities.vk_album import VkAlbum
+from entities.album import VkAlbum
+from entities.session import VkSession
 from forms.album_form import AlbumForm
 from forms.auth_form import AuthForm
-from vk_downloader import VkDownloader
-from vk_session import VkSession
+
+from downloader import VkDownloader
 
 
 class MainWindow(QWidget):
@@ -20,7 +21,7 @@ class MainWindow(QWidget):
         QWidget.__init__(self)
         uic.loadUi("designs/main.ui", self)
 
-        self.vk_album_dict = None
+        self.selected_album: dict = None
 
         self.download_button.clicked.connect(self.download_button_click)
         self.configure_table()
@@ -54,7 +55,7 @@ class MainWindow(QWidget):
             .setSectionResizeMode(QHeaderView.Stretch)
 
     def get_current_album(self, row):
-        self.vk_album_dict = {
+        self.selected_album = {
             'artist': self.album_table.item(row, 0).text().strip(),
             'title': self.album_table.item(row, 1).text().strip(),
             'album_id': int(self.album_table.item(row, 2).text()),
@@ -83,13 +84,13 @@ class MainWindow(QWidget):
                 albumRow, 4, QTableWidgetItem(album['access_hash']))
 
     def download_button_click(self):
-        if self.vk_album_dict is not None:
-            self.album_form = AlbumForm(self.vk_album_dict)
-            self.album_form.finished.connect(self.vk_album_handler)
+        if self.selected_album is not None:
+            self.album_form = AlbumForm(self.selected_album)
+            self.album_form.finished.connect(self.selected_album_handler)
             self.album_form.show()
 
     @pyqtSlot(dict)
-    def vk_album_handler(self, value):     
+    def selected_album_handler(self, value):     
         self.vk_downloader = VkDownloader(
             VkAlbum(
                     artist=value['artist'],
@@ -102,8 +103,21 @@ class MainWindow(QWidget):
                     access_hash=value['access_hash']
                 )
             )
-        
+
+        self.vk_downloader.started.connect(self.download_started)
+        self.vk_downloader.finished.connect(self.download_finished)
         self.vk_downloader.start()
+    
+    @pyqtSlot()
+    def download_started(self):
+        self.download_button.setEnabled(False)
+        print_message("Загрузка альбома началась!")
+
+    @pyqtSlot()
+    def download_finished(self):
+        self.download_button.setEnabled(True)
+        print_message("Загрузка альбома завершилась!")
+
 
 if __name__ == "__main__":
     import sys

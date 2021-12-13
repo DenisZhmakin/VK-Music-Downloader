@@ -10,5 +10,5 @@ class VkSong:
     album: str
     title: str
     genre: str
-    year: int
+    year: str
     url: str

@@ -7,7 +7,7 @@ class VkAlbum:
     title: str
     cover: str
     genre: str
-    year: int
+    year: str
     album_id: int
     owner_id: int
     access_hash: str

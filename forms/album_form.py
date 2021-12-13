@@ -1,6 +1,6 @@
 from pathlib import Path
 from PyQt5 import uic
-from PyQt5.QtCore import QLine, pyqtSignal
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QComboBox, QFileDialog, QLineEdit, QWidget
 
 from utils import print_message, validate_QLineEdit
@@ -47,14 +47,14 @@ class AlbumForm(QWidget):
             return
 
         if not validate_QLineEdit(self.year_line):
-            print_message("Поле года альбома пустое. Заполните его")
+            print_message("Отсутствует год выпуска альбома")
             return
             
         self.vk_album['cover'] = self.cover_line.text()
         self.vk_album['artist'] = self.artist_line.text()
         self.vk_album['title'] = self.album_line.text()
         self.vk_album['genre'] = self.genre_combobox.currentText()
-        self.vk_album['year'] = int(self.year_line.text())
+        self.vk_album['year'] = self.year_line.text()
 
         self.finished.emit(self.vk_album)
         self.close()
