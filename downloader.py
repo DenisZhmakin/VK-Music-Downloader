@@ -1,28 +1,31 @@
-import os
 import utils
 import requests
+import tempfile
+import subprocess
+from pathlib import Path
+
+from PyQt5.QtCore import QThread
+from vk_api.audio import VkAudio
+from pathvalidate import sanitize_filename
 
 from mutagen.easyid3 import EasyID3
 from mutagen.id3 import ID3, APIC
 from mutagen.mp3 import MP3 
 
-from pathlib import Path
-from PyQt5.QtCore import QThread
-from vk_api.audio import VkAudio
-from pathvalidate import sanitize_filename
-
 from entities.album import VkAlbum
 from entities.session import VkSession
 from entities.song import VkSong
+
 
 class VkDownloader(QThread):
     def __init__(self, album: VkAlbum):
         QThread.__init__(self)
         self.album = album
+        
         self.music_dir = Path.home() / "Музыка" / sanitize_filename(album.artist, "_") / sanitize_filename(album.title, "_")
         self.music_dir.mkdir(parents=True, exist_ok=True)
 
-        self.tmp_dir = Path("/tmp") / sanitize_filename(album.artist, "_") / sanitize_filename(album.title, "_")
+        self.tmp_dir = Path(tempfile.gettempdir()) / sanitize_filename(album.artist, "_") / sanitize_filename(album.title, "_")
         self.tmp_dir.mkdir(parents=True, exist_ok=True)
 
     def run(self):
@@ -51,21 +54,17 @@ class VkDownloader(QThread):
             self.rename_file(vk_song)
         
     def download_track(self, track: VkSong):
-        save_file_path = Path(self.music_dir / f"{track.track_code}.mp3")
+        mp3_file = self.music_dir / f"{track.track_code}.mp3"
+        ts_file = self.tmp_dir / f"{track.track_code}.ts"
 
-        if 'long_chunk=1' in track.url:
+        if 'index.m3u8' in track.url:
+            subprocess.call(["streamlink", "--output", ts_file, track.url, "best"])
+            subprocess.call(f"ffmpeg -i \"{ts_file}\" -ab 320k \"{mp3_file}\"", shell=True)
+        elif 'long_chunk=1' in track.url:
             r = requests.get(track.url)
 
-            with open(save_file_path, 'wb') as f: 
+            with open(mp3_file, 'wb') as f: 
                 f.write(r.content)
-        elif 'index.m3u8' in track.url:
-            # TODO: заменить на subprocess
-
-            ts_file = str(self.tmp_dir / f"{track.track_code}.ts")
-            os.system(f"""           
-                streamlink --output "{ts_file}" {track.url} best
-                ffmpeg -i "{ts_file}" -ab 320k "{str(save_file_path)}"
-            """)
         
     def set_mp3_tags(self, track: VkSong):
         audio = MP3(filename=str(Path(self.music_dir / f"{track.track_code}.mp3")), ID3=EasyID3)
@@ -101,4 +100,3 @@ class VkDownloader(QThread):
             new_name = new_name.replace('/', '_')
 
         file.rename(self.music_dir / new_name)
-    
