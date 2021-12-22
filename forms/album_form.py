@@ -1,9 +1,15 @@
+# pylint: disable=no-name-in-module
+# pylint: disable=import-error
 from pathlib import Path
-from PyQt5 import uic
-from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QComboBox, QFileDialog, QLineEdit, QWidget
 
-from utils import print_message, validate_QLineEdit
+import requests
+from pathvalidate import sanitize_filename
+from PyQt5 import uic
+from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import (QComboBox, QFileDialog, QGraphicsPixmapItem,
+                             QGraphicsScene, QGraphicsView, QLineEdit, QWidget)
+from utils import get_cover_url_of_album, print_message, validate_QLineEdit
 
 mp3_genre = ["Rap", "Rock"]
 
@@ -24,10 +30,29 @@ class AlbumForm(QWidget):
         self.genre_combobox.addItems(mp3_genre)
         self.artist_line.setText(vk_album['artist'])
         self.album_line.setText(vk_album['title'])
+        
+        self.music_dir = Path.home() / "Музыка" / sanitize_filename(vk_album['artist'], "_") / sanitize_filename(vk_album['title'], "_")
+        self.music_dir.mkdir(parents=True, exist_ok=True)
 
         self.cover_button.clicked.connect(self.cover_button_click)
         self.result_button.clicked.connect(self.result_button_click)
+                
+        self.scene = QGraphicsScene()
+        self.graphicsView.setScene(self.scene)
+        self.pixmap_item = QGraphicsPixmapItem()
+        self.scene.addItem(self.pixmap_item)
+               
+        self.load_cover()
+    
+    def load_cover(self):
+        cover_url = get_cover_url_of_album(self.vk_album['artist'], self.vk_album['title'])
         
+        img_path = Path(self.music_dir / "cover.jpeg")
+        response = requests.get("http://" + cover_url)
+
+        with open(img_path, 'wb') as file:
+            file.write(response.content)
+                        
     def cover_button_click(self):
         files_filter = "Image file (*.jpeg *.jpg *.png)"
         cover = QFileDialog.getOpenFileName(self, 'Select a cover image', str(Path.home() / 'Загрузки'), files_filter)

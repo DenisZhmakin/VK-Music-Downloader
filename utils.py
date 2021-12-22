@@ -1,7 +1,32 @@
+# pylint: disable=missing-function-docstring
+# pylint: disable=missing-module-docstring
+# pylint: disable=import-error
 import random
 import string
-from PyQt5.QtWidgets import QLineEdit, QMessageBox
 
+from PyQt5.QtWidgets import (QLineEdit, QMessageBox)
+from vk_api.audio import VkAudio
+from yandex_music import Client
+from fuzzywuzzy import fuzz
+from yandex_music.artist.artist import Artist
+
+from entities.album import VkAlbum
+from entities.session import VkSession
+from entities.song import VkSong
+
+def get_cover_url_of_album(artist_name: str = "", album_name: str = ""):
+    response = Client().search(artist_name.replace('/', '_'))
+
+    if not (response.best and response.best.type == 'artist'):
+        raise TypeError("Артист не найден")
+
+    artist: Artist = response.best.result
+
+    for album in artist.get_albums():
+        if fuzz.WRatio(album.title, album_name) > 92:
+            return album.cover_uri.replace("%%", "600x600")
+
+    raise TypeError("Альбом не найден")
 
 def validate_QLineEdit(field: QLineEdit):
     input_str = field.text()
@@ -19,8 +44,29 @@ def print_message(message):
     msgBox.setWindowTitle("Сообщение о ошибке")
     msgBox.setIcon(QMessageBox.Information)
     msgBox.setText(message)
-    
+
     msgBox.exec()
 
 def generate_track_code():
     return f"{''.join(random.choice(string.ascii_lowercase) for i in range(25))}"
+
+def vk_song_iter(vk_album: VkAlbum):
+    vkaudio = VkAudio(VkSession().get_session())
+
+    owner_id = vk_album.owner_id
+    album_id = vk_album.album_id
+    access_hash = vk_album.access_hash
+
+    for i, track in enumerate(vkaudio.get_iter(owner_id, album_id, access_hash), 1):
+        yield VkSong(
+            number=i,
+            cover=vk_album.cover,
+            track_code=generate_track_code(),
+            artist=vk_album.artist,
+            album=vk_album.title,
+            title=track['title'],
+            genre=vk_album.genre,
+            year=vk_album.year,
+            url=track['url']
+        )
+  

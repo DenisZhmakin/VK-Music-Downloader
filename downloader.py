@@ -1,19 +1,17 @@
-import utils
 import requests
 import tempfile
 import subprocess
 from pathlib import Path
 
 from PyQt5.QtCore import QThread
-from vk_api.audio import VkAudio
 from pathvalidate import sanitize_filename
 
 from mutagen.easyid3 import EasyID3
 from mutagen.id3 import ID3, APIC
 from mutagen.mp3 import MP3 
 
+import utils
 from entities.album import VkAlbum
-from entities.session import VkSession
 from entities.song import VkSong
 
 
@@ -29,30 +27,12 @@ class VkDownloader(QThread):
         self.tmp_dir.mkdir(parents=True, exist_ok=True)
 
     def run(self):
-        vkaudio = VkAudio(VkSession().get_session())
-
-        owner_id = self.album.owner_id
-        album_id = self.album.album_id
-        access_hash = self.album.access_hash
-       
-        for i, track in enumerate(vkaudio.get_iter(owner_id, album_id, access_hash), 1):
-            vk_song = VkSong(
-                number=i,
-                cover=self.album.cover,
-                track_code=utils.generate_track_code(),
-                artist=self.album.artist,
-                album=self.album.title,
-                title=track['title'],
-                genre=self.album.genre,
-                year=self.album.year,
-                url=track['url']
-            )
-
+        for vk_song in utils.vk_song_iter(self.album):
             self.download_track(vk_song)
             self.set_mp3_tags(vk_song)
             self.set_cover_image(vk_song)
             self.rename_file(vk_song)
-        
+             
     def download_track(self, track: VkSong):
         mp3_file = self.music_dir / f"{track.track_code}.mp3"
         ts_file = self.tmp_dir / f"{track.track_code}.ts"
@@ -65,7 +45,7 @@ class VkDownloader(QThread):
 
             with open(mp3_file, 'wb') as f: 
                 f.write(r.content)
-        
+  
     def set_mp3_tags(self, track: VkSong):
         audio = MP3(filename=str(Path(self.music_dir / f"{track.track_code}.mp3")), ID3=EasyID3)
 
@@ -85,7 +65,7 @@ class VkDownloader(QThread):
             audio['APIC'] = APIC(
                 encoding=3,
                 mime='image/jpeg',
-                type=3, desc=u'Cover',
+                type=3, desc='Cover',
                 data=album_art.read()
             )
 

@@ -2,4 +2,7 @@ mutagen
 pathvalidate
 PyQt5
 requests
+fuzzywuzzy
+yandex-music
 vk_api
+bs4

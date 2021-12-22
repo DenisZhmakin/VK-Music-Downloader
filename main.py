@@ -60,6 +60,7 @@ class MainWindow(QWidget):
             'title': self.album_table.item(row, 1).text().strip(),
             'album_id': int(self.album_table.item(row, 2).text()),
             'owner_id': int(self.album_table.item(row, 3).text()),
+
             'access_hash': self.album_table.item(row, 4).text()
         }
 
@@ -73,7 +74,7 @@ class MainWindow(QWidget):
             self.album_table.insertRow(albumRow)
 
             self.album_table.setItem(
-                albumRow, 0, QTableWidgetItem(album['author']))
+                albumRow, 0, QTableWidgetItem(album['artist']))
             self.album_table.setItem(
                 albumRow, 1, QTableWidgetItem(album['title']))
             self.album_table.setItem(
@@ -90,7 +91,7 @@ class MainWindow(QWidget):
             self.album_form.show()
 
     @pyqtSlot(dict)
-    def selected_album_handler(self, value):     
+    def selected_album_handler(self, value):
         self.vk_downloader = VkDownloader(
             VkAlbum(
                     artist=value['artist'],
