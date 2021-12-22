@@ -60,7 +60,6 @@ class MainWindow(QWidget):
             'title': self.album_table.item(row, 1).text().strip(),
             'album_id': int(self.album_table.item(row, 2).text()),
             'owner_id': int(self.album_table.item(row, 3).text()),
-
             'access_hash': self.album_table.item(row, 4).text()
         }
 

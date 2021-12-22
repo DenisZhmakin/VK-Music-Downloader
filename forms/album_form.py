@@ -5,8 +5,8 @@ from pathlib import Path
 import requests
 from pathvalidate import sanitize_filename
 from PyQt5 import uic
-from PyQt5.QtCore import pyqtSignal, Qt
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import QRect, Qt, pyqtSignal
+from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtWidgets import (QComboBox, QFileDialog, QGraphicsPixmapItem,
                              QGraphicsScene, QGraphicsView, QLineEdit, QWidget)
 from utils import get_cover_url_of_album, print_message, validate_QLineEdit
@@ -37,10 +37,7 @@ class AlbumForm(QWidget):
         self.cover_button.clicked.connect(self.cover_button_click)
         self.result_button.clicked.connect(self.result_button_click)
                 
-        self.scene = QGraphicsScene()
-        self.graphicsView.setScene(self.scene)
-        self.pixmap_item = QGraphicsPixmapItem()
-        self.scene.addItem(self.pixmap_item)
+        
                
         self.load_cover()
     
@@ -52,6 +49,32 @@ class AlbumForm(QWidget):
 
         with open(img_path, 'wb') as file:
             file.write(response.content)
+            
+        scene = QGraphicsScene(self)
+        image = QImage()
+        image.load(str(img_path))
+        image = image.scaled(311, 311, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
+        item = QGraphicsPixmapItem(QPixmap.fromImage(image))
+        scene.addItem(item)
+        self.graphicsView.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.graphicsView.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.graphicsView.setScene(scene)
+        
+        # self.ref_Rect = QRect(0, 0, 311, 311)
+        # 
+        # self.graphicsView.setGeometry(self.ref_Rect)
+            
+        # scene = QGraphicsScene(self.graphicsView)
+        # scene.setSceneRect(10, 10, self.ref_Rect.width(), self.ref_Rect.height())
+        # self.graphicsView.setScene(scene)
+        
+        # image = QImage()
+        # image.load(str(img_path))
+        # image = image.scaled(self.ref_Rect.width(), self.ref_Rect.height(), Qt.IgnoreAspectRatio, Qt.SmoothTransformation); 
+        # item = QGraphicsPixmapItem(QPixmap.fromImage(image))
+
+        # scene.addItem(item)
+        # self.graphicsView.show()
                         
     def cover_button_click(self):
         files_filter = "Image file (*.jpeg *.jpg *.png)"
