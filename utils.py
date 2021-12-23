@@ -92,7 +92,7 @@ def vk_song_iter(vk_album: VkAlbum):
     for i, track in enumerate(vkaudio.get_iter(owner_id, album_id, access_hash), 1):
         yield VkSong(
             number=i,
-            cover=vk_album.cover,
+            cover=vk_album.cover_path,
             track_code=generate_track_code(),
             artist=vk_album.artist,
             album=vk_album.title,

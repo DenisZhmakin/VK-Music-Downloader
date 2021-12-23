@@ -19,9 +19,6 @@ class VkDownloader(QThread):
     def __init__(self, album: VkAlbum):
         QThread.__init__(self)
         self.album = album
-        
-        self.music_dir = Path.home() / "Музыка" / sanitize_filename(album.artist, "_") / sanitize_filename(album.title, "_")
-        self.music_dir.mkdir(parents=True, exist_ok=True)
 
         self.tmp_dir = Path(tempfile.gettempdir()) / sanitize_filename(album.artist, "_") / sanitize_filename(album.title, "_")
         self.tmp_dir.mkdir(parents=True, exist_ok=True)
@@ -34,7 +31,7 @@ class VkDownloader(QThread):
             self.rename_file(vk_song)
              
     def download_track(self, track: VkSong):
-        mp3_file = self.music_dir / f"{track.track_code}.mp3"
+        mp3_file = self.album.album_path / f"{track.track_code}.mp3"
         ts_file = self.tmp_dir / f"{track.track_code}.ts"
 
         if 'index.m3u8' in track.url:
@@ -47,19 +44,19 @@ class VkDownloader(QThread):
                 f.write(r.content)
   
     def set_mp3_tags(self, track: VkSong):
-        audio = MP3(filename=str(Path(self.music_dir / f"{track.track_code}.mp3")), ID3=EasyID3)
+        audio = MP3(filename=str(Path(self.album.album_path / f"{track.track_code}.mp3")), ID3=EasyID3)
 
         audio['title'] = track.title
         audio['artist'] = track.artist
         audio['tracknumber'] = str(track.number)
-        audio['date'] = track.year
+        audio['date'] = str(track.year)
         audio['album'] = track.album
         audio['genre'] = track.genre
 
         audio.save()
     
     def set_cover_image(self, track: VkSong):
-        audio = ID3(Path(self.music_dir / f"{track.track_code}.mp3"))
+        audio = ID3(Path(self.album.album_path / f"{track.track_code}.mp3"))
 
         with open(track.cover, 'rb') as album_art:
             audio['APIC'] = APIC(
@@ -72,11 +69,11 @@ class VkDownloader(QThread):
         audio.save()
 
     def rename_file(self, track: VkSong):
-        file = Path(self.music_dir / f"{track.track_code}.mp3")
+        file = Path(self.album.album_path / f"{track.track_code}.mp3")
         
         new_name = f"{str(track.number).zfill(2)}. {sanitize_filename(track.title, '_')}.mp3"
 
         if "/" in new_name:
             new_name = new_name.replace('/', '_')
 
-        file.rename(self.music_dir / new_name)
+        file.rename(self.album.album_path / new_name)
