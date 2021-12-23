@@ -156,19 +156,6 @@
     <string>Поехали...</string>
    </property>
   </widget>
-  <widget class="QComboBox" name="genre_combobox">
-   <property name="geometry">
-    <rect>
-     <x>340</x>
-     <y>230</y>
-     <width>491</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="editable">
-    <bool>true</bool>
-   </property>
-  </widget>
   <widget class="QGraphicsView" name="graphicsView">
    <property name="geometry">
     <rect>
@@ -176,6 +163,16 @@
      <y>10</y>
      <width>311</width>
      <height>311</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="genre_line">
+   <property name="geometry">
+    <rect>
+     <x>340</x>
+     <y>230</y>
+     <width>491</width>
+     <height>25</height>
     </rect>
    </property>
   </widget>

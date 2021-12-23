@@ -1,18 +1,48 @@
 # pylint: disable=missing-function-docstring
 # pylint: disable=missing-module-docstring
 # pylint: disable=import-error
+import contextlib
+import os
 import random
 import string
 
-from PyQt5.QtWidgets import (QLineEdit, QMessageBox)
+from fuzzywuzzy import fuzz
+from pathvalidate import sanitize_filename
+from PyQt5.QtWidgets import QLineEdit, QMessageBox
 from vk_api.audio import VkAudio
 from yandex_music import Client
-from fuzzywuzzy import fuzz
 from yandex_music.artist.artist import Artist
-
 from entities.album import VkAlbum
 from entities.session import VkSession
 from entities.song import VkSong
+
+
+def get_album_description(artist_name: str, album_title: str) -> dict:
+    """ TODO: generate docstring """   
+    with contextlib.redirect_stderr(open(os.devnull, "w", encoding="UTF-8")):
+        with contextlib.redirect_stdout(open(os.devnull, "w", encoding="UTF-8")):
+            response = Client().search(sanitize_filename(artist_name))
+
+    if response.best and response.best.type != 'artist':
+        raise TypeError("Артист не найден")
+
+    artist: Artist = response.best.result
+
+    for album in artist.get_albums(page_size=100):
+        if fuzz.WRatio(album.title, album_title) > 90:
+            result = {
+                'artist': artist.name,
+                'title': album.title,
+                'genre': album.genre,
+                'year': album.year,
+                'cover_url': f"https://{album.cover_uri.replace('%%', '600x600')}",
+                'track_count': album.track_count
+            }
+            break
+    else:
+        raise TypeError("Альбом не найден")
+
+    return result
 
 def get_cover_url_of_album(artist_name: str, album_title: str):
     response = Client().search(artist_name.replace('/', '_'))

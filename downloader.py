@@ -39,7 +39,7 @@ class VkDownloader(QThread):
 
         if 'index.m3u8' in track.url:
             subprocess.call(["streamlink", "--output", ts_file, track.url, "best"])
-            subprocess.call(f"ffmpeg -i \"{ts_file}\" -ab 320k \"{mp3_file}\"", shell=True)
+            subprocess.call(["ffmpeg", "-i", ts_file, "-ab", "320k", mp3_file])
         elif 'long_chunk=1' in track.url:
             r = requests.get(track.url)
 

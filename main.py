@@ -4,16 +4,16 @@ from pathlib import Path
 
 from PyQt5 import uic
 from PyQt5.QtCore import Qt, pyqtSlot
-from PyQt5.QtWidgets import QApplication, QHeaderView, QTableWidgetItem, QWidget
+from PyQt5.QtWidgets import (QApplication, QHeaderView, QTableWidgetItem,
+                             QWidget)
 from vk_api.audio import VkAudio
-from utils import print_message
 
+from downloader import VkDownloader
 from entities.album import VkAlbum
 from entities.session import VkSession
 from forms.album_form import AlbumForm
 from forms.auth_form import AuthForm
-
-from downloader import VkDownloader
+from utils import print_message
 
 
 class MainWindow(QWidget):
@@ -89,20 +89,9 @@ class MainWindow(QWidget):
             self.album_form.finished.connect(self.selected_album_handler)
             self.album_form.show()
 
-    @pyqtSlot(dict)
+    @pyqtSlot(VkAlbum)
     def selected_album_handler(self, value):
-        self.vk_downloader = VkDownloader(
-            VkAlbum(
-                    artist=value['artist'],
-                    title=value['title'],
-                    cover=value['cover'],
-                    genre=value['genre'],
-                    year=value['year'],
-                    album_id=value['album_id'],
-                    owner_id=value['owner_id'],
-                    access_hash=value['access_hash']
-                )
-            )
+        self.vk_downloader = VkDownloader(value)
 
         self.vk_downloader.started.connect(self.download_started)
         self.vk_downloader.finished.connect(self.download_finished)
