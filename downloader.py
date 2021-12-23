@@ -38,10 +38,8 @@ class VkDownloader(QThread):
             subprocess.call(["streamlink", "--output", ts_file, track.url, "best"])
             subprocess.call(["ffmpeg", "-i", ts_file, "-ab", "320k", mp3_file])
         elif 'long_chunk=1' in track.url:
-            r = requests.get(track.url)
-
-            with open(mp3_file, 'wb') as f: 
-                f.write(r.content)
+            responce = requests.get(track.url)
+            mp3_file.write_bytes(responce.content)
   
     def set_mp3_tags(self, track: VkSong):
         audio = MP3(filename=str(Path(self.album.album_path / f"{track.track_code}.mp3")), ID3=EasyID3)
@@ -70,10 +68,7 @@ class VkDownloader(QThread):
 
     def rename_file(self, track: VkSong):
         file = Path(self.album.album_path / f"{track.track_code}.mp3")
-        
+       
         new_name = f"{str(track.number).zfill(2)}. {sanitize_filename(track.title, '_')}.mp3"
-
-        if "/" in new_name:
-            new_name = new_name.replace('/', '_')
 
         file.rename(self.album.album_path / new_name)

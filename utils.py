@@ -18,7 +18,7 @@ from entities.song import VkSong
 
 
 def get_album_description(artist_name: str, album_title: str) -> dict:
-    """ TODO: generate docstring """   
+    """ TODO: generate docstring """  
     with contextlib.redirect_stderr(open(os.devnull, "w", encoding="UTF-8")):
         with contextlib.redirect_stdout(open(os.devnull, "w", encoding="UTF-8")):
             response = Client().search(sanitize_filename(artist_name))
@@ -42,22 +42,6 @@ def get_album_description(artist_name: str, album_title: str) -> dict:
     else:
         raise TypeError("Альбом не найден")
 
-    return result
-
-def get_cover_url_of_album(artist_name: str, album_title: str):
-    response = Client().search(artist_name.replace('/', '_'))
-    
-    if response.best and response.best.type != 'artist':
-        raise TypeError("Артист не найден")
-    
-    artist: Artist = response.best.result
-
-    for album in artist.get_albums(page_size=100):
-        if fuzz.WRatio(album.title, album_title) > 92:
-            result = album.cover_uri.replace("%%", "600x600")
-            break
-    else:
-        raise TypeError("Альбом не найден")
     return result
 
 def validate_QLineEdit(field: QLineEdit):
