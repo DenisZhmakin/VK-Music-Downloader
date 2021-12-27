@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
+from tempfile import TemporaryFile
+
 
 @dataclass
 class VkAlbum:
@@ -7,8 +9,7 @@ class VkAlbum:
     title: str
     genre: str
     year: int
-    cover_path: Path
-    album_path: Path
+    cover_url: str
     album_id: int
     owner_id: int
     access_hash: str

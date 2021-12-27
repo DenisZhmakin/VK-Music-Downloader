@@ -1,15 +1,17 @@
 # pylint: disable=no-name-in-module
 # pylint: disable=import-error
 from pathlib import Path
+from tempfile import TemporaryFile
+import tempfile
 
 import requests
+from entities.album import VkAlbum
 from pathvalidate import sanitize_filename
 from PyQt5 import uic
 from PyQt5.QtCore import QRect, Qt, pyqtSignal
-from PyQt5.QtGui import QPixmap, QImage
+from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtWidgets import (QComboBox, QFileDialog, QGraphicsPixmapItem,
                              QGraphicsScene, QGraphicsView, QLineEdit, QWidget)
-from entities.album import VkAlbum
 from utils import get_album_description, print_message, validate_QLineEdit
 
 
@@ -20,49 +22,35 @@ class AlbumForm(QWidget):
         QWidget.__init__(self)
         uic.loadUi("designs/album.ui", self)
         
-        self.music_dir = Path.home() / "Музыка"
-                
-        try:
-            self.album_dict = get_album_description(album_info['artist'], album_info['title'])
-            
-            self.save_path = Path(self.music_dir /
-                sanitize_filename(self.album_dict['artist'], "_") /
-                sanitize_filename(self.album_dict['title'], "_")
-            )
-            self.save_path.mkdir(parents=True, exist_ok=True)
-            
-            self.downlaod_image_cover()
-            self.set_album_cover()
-            self.fill_form_field()
+        self.result_button.clicked.connect(self.result_button_click)
+
+        album_dict = get_album_description(album_info['artist'], album_info['title'])
+        
+        if album_dict:
+            self.set_album_cover(album_dict['cover_url'])
+            self.fill_form_field(album_dict)
             
             self.vk_album = VkAlbum(
-                artist=self.album_dict['artist'],
-                title=self.album_dict['title'],
-                genre=self.album_dict['genre'],
-                year=self.album_dict['year'],
-                cover_path=self.save_path / "cover.jpeg",
-                album_path=self.save_path,
+                artist=album_dict['artist'],
+                title=album_dict['title'],
+                genre=album_dict['genre'],
+                year=album_dict['year'],
+                cover_url=album_dict['cover_url'],
                 album_id=album_info['album_id'],
                 owner_id=album_info['owner_id'],
-                access_hash=album_info['access_hash'],
+                access_hash=album_info['access_hash']
             )
-        except TypeError:
-            # self.cover_button.clicked.connect(self.cover_button_click)           
+        else:
             print_message("Информация для данного альбома не найдена")
-        
-        self.result_button.clicked.connect(self.result_button_click)
             
-    def downlaod_image_cover(self):           
-        response = requests.get(self.album_dict['cover_url'])
 
-        with open(self.save_path / "cover.jpeg", 'wb') as file:
-            file.write(response.content)
-    
-    def set_album_cover(self):       
+    def set_album_cover(self, cover_url: str):
+        response = requests.get(cover_url)
         scene = QGraphicsScene(self)
         
         image = QImage()
-        image.load(str(self.save_path / "cover.jpeg"))
+        image.loadFromData(response.content)
+        
         image = image.scaled(308, 308, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
         item = QGraphicsPixmapItem(QPixmap.fromImage(image))
         scene.addItem(item)
@@ -71,37 +59,12 @@ class AlbumForm(QWidget):
         self.graphicsView.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.graphicsView.setScene(scene)
     
-    def fill_form_field(self):                
-        self.cover_line.setText(str(self.save_path / "cover.jpeg"))
-        self.artist_line.setText(self.album_dict['artist'])
-        self.album_line.setText(self.album_dict['title'])
-        self.genre_line.setText(self.album_dict['genre'])
-        self.year_line.setText(f"{self.album_dict['year']}")
-        self.cover_button.setEnabled(False)
-                             
-    # def cover_button_click(self):
-    #     files_filter = "Image file (*.jpeg *.jpg *.png)"
-    #     cover = QFileDialog.getOpenFileName(self, 'Select a cover image', str(Path.home() / 'Загрузки'), files_filter)
-    #     self.cover_line.setText(cover[0])
+    def fill_form_field(self, album_dict: dict):                
+        self.artist_line.setText(album_dict['artist'])
+        self.album_line.setText(album_dict['title'])
+        self.genre_line.setText(album_dict['genre'])
+        self.year_line.setText(f"{album_dict['year']}")
 
     def result_button_click(self):
-        if not validate_QLineEdit(self.cover_line):
-            print_message("Обложка не выбрана.")
-            return
-        
-        if not validate_QLineEdit(self.artist_line):
-            print_message("Поле артиста пустое. Заполните его")
-            return
-
-        if not validate_QLineEdit(self.album_line):
-            print_message("Поле альбома пустое. Заполните его")
-            return
-
-        if not validate_QLineEdit(self.year_line):
-            print_message("Отсутствует год выпуска альбома")
-            return
-            
-        
-
         self.finished.emit(self.vk_album)
         self.close()

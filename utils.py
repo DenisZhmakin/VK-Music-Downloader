@@ -24,7 +24,7 @@ def get_album_description(artist_name: str, album_title: str) -> dict:
             response = Client().search(sanitize_filename(artist_name))
 
     if response.best and response.best.type != 'artist':
-        raise TypeError("Артист не найден")
+        return False
 
     artist: Artist = response.best.result
 
@@ -40,7 +40,7 @@ def get_album_description(artist_name: str, album_title: str) -> dict:
             }
             break
     else:
-        raise TypeError("Альбом не найден")
+        return False
 
     return result
 
@@ -63,26 +63,24 @@ def print_message(message):
 
     msgBox.exec()
 
-def generate_track_code():
-    return f"{''.join(random.choice(string.ascii_lowercase) for i in range(25))}"
-
-def vk_song_iter(vk_album: VkAlbum):
+def get_tracklist_iter(album: VkAlbum):
     vkaudio = VkAudio(VkSession().get_session())
 
-    owner_id = vk_album.owner_id
-    album_id = vk_album.album_id
-    access_hash = vk_album.access_hash
+    owner_id = album.owner_id
+    album_id = album.album_id
+    access_hash = album.access_hash
 
     for i, track in enumerate(vkaudio.get_iter(owner_id, album_id, access_hash), 1):
         yield VkSong(
-            number=i,
-            cover=vk_album.cover_path,
-            track_code=generate_track_code(),
-            artist=vk_album.artist,
-            album=vk_album.title,
+            track_num=i,
+            artist=album.artist,
+            album=album.title,
             title=track['title'],
-            genre=vk_album.genre,
-            year=vk_album.year,
+            cover_path=album.cover_path,
+            album_path=album.album_path,
+            track_code="".join(random.choice(string.ascii_lowercase) for i in range(25)),
+            genre=album.genre,
+            year=album.year,
             url=track['url']
         )
   

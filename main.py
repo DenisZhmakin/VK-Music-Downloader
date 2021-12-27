@@ -13,7 +13,7 @@ from entities.album import VkAlbum
 from entities.session import VkSession
 from forms.album_form import AlbumForm
 from forms.auth_form import AuthForm
-from utils import print_message
+from utils import get_album_description, print_message
 
 
 class MainWindow(QWidget):
@@ -21,7 +21,7 @@ class MainWindow(QWidget):
         QWidget.__init__(self)
         uic.loadUi("designs/main.ui", self)
 
-        self.selected_album: dict = None
+        self._album_info: dict = None
 
         self.download_button.clicked.connect(self.download_button_click)
         self.configure_table()
@@ -55,7 +55,7 @@ class MainWindow(QWidget):
             .setSectionResizeMode(QHeaderView.Stretch)
 
     def get_current_album(self, row):
-        self.selected_album = {
+        self._album_info = {
             'artist': self.album_table.item(row, 0).text().strip(),
             'title': self.album_table.item(row, 1).text().strip(),
             'album_id': int(self.album_table.item(row, 2).text()),
@@ -85,6 +85,24 @@ class MainWindow(QWidget):
 
     def download_button_click(self):
         if self.selected_album is not None:
+            album_dict = get_album_description(self._album_info['artist'], self._album_info['title'])
+        
+            if album_dict:
+                self.set_album_cover(album_dict['cover_url'])
+                self.fill_form_field(album_dict)
+                
+                self.vk_album = VkAlbum(
+                    artist=album_dict['artist'],
+                    title=album_dict['title'],
+                    genre=album_dict['genre'],
+                    year=album_dict['year'],
+                    cover_url=album_dict['cover_url'],
+                    album_id=self._album_info['album_id'],
+                    owner_id=self._album_info['owner_id'],
+                    access_hash=self._album_info['access_hash']
+                )
+            else:
+                print_message("Информация для данного альбома не найдена")
             self.album_form = AlbumForm(self.selected_album)
             self.album_form.finished.connect(self.selected_album_handler)
             self.album_form.show()

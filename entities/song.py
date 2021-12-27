@@ -1,14 +1,16 @@
 from dataclasses import dataclass
+from pathlib import Path
 
 
 @dataclass
 class VkSong:
-    number: int
-    cover: str
-    track_code: str
+    track_num: int
     artist: str
     album: str
     title: str
+    cover_path: Path
+    album_path: Path
+    track_code: str
     genre: str
-    year: str
+    year: int
     url: str
