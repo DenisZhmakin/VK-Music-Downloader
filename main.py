@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import json
 from pathlib import Path
 
 from PyQt5 import uic
@@ -13,7 +12,7 @@ from entities.album import VkAlbum
 from entities.session import VkSession
 from forms.album_form import AlbumForm
 from forms.auth_form import AuthForm
-from utils import get_album_description, print_message
+from utils import find_album_by_artist, print_message
 
 
 class MainWindow(QWidget):
@@ -84,28 +83,19 @@ class MainWindow(QWidget):
                 albumRow, 4, QTableWidgetItem(album['access_hash']))
 
     def download_button_click(self):
-        if self.selected_album is not None:
-            album_dict = get_album_description(self._album_info['artist'], self._album_info['title'])
+        if self._album_info is not None:
+            result = find_album_by_artist(self._album_info['artist'], self._album_info['title'])
         
-            if album_dict:
-                self.set_album_cover(album_dict['cover_url'])
-                self.fill_form_field(album_dict)
+            if result:
+                self._album_info['artist'] = result[0]
+                self._album_info['title'] = result[1]
                 
-                self.vk_album = VkAlbum(
-                    artist=album_dict['artist'],
-                    title=album_dict['title'],
-                    genre=album_dict['genre'],
-                    year=album_dict['year'],
-                    cover_url=album_dict['cover_url'],
-                    album_id=self._album_info['album_id'],
-                    owner_id=self._album_info['owner_id'],
-                    access_hash=self._album_info['access_hash']
-                )
+                self.album_form = AlbumForm(self._album_info)
+                self.album_form.finished.connect(self.selected_album_handler)
+                self.album_form.show()
             else:
                 print_message("Информация для данного альбома не найдена")
-            self.album_form = AlbumForm(self.selected_album)
-            self.album_form.finished.connect(self.selected_album_handler)
-            self.album_form.show()
+            
 
     @pyqtSlot(VkAlbum)
     def selected_album_handler(self, value):

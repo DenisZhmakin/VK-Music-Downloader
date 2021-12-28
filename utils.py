@@ -5,31 +5,38 @@ import contextlib
 import os
 import random
 import string
+from typing import Union
 
 from fuzzywuzzy import fuzz
 from pathvalidate import sanitize_filename
 from PyQt5.QtWidgets import QLineEdit, QMessageBox
 from vk_api.audio import VkAudio
 from yandex_music import Client
+from yandex_music.album.album import Album
 from yandex_music.artist.artist import Artist
+
 from entities.album import VkAlbum
 from entities.session import VkSession
 from entities.song import VkSong
 
 
-def get_album_description(artist_name: str, album_title: str) -> dict:
-    """ TODO: generate docstring """  
+def _search(input: str):
     with contextlib.redirect_stderr(open(os.devnull, "w", encoding="UTF-8")):
         with contextlib.redirect_stdout(open(os.devnull, "w", encoding="UTF-8")):
-            response = Client().search(sanitize_filename(artist_name))
+            return Client().search(sanitize_filename(input))
+
+def get_album_description(artist_name: str, album_title: str) -> dict:
+    """ TODO: generate docstring """ 
+    
+    response = _search(artist_name)
 
     if response.best and response.best.type != 'artist':
-        return False
+        raise TypeError("Артист не найден")
 
     artist: Artist = response.best.result
 
     for album in artist.get_albums(page_size=100):
-        if fuzz.WRatio(album.title, album_title) > 90:
+        if fuzz.WRatio(album.title, album_title) > 92:
             result = {
                 'artist': artist.name,
                 'title': album.title,
@@ -40,8 +47,27 @@ def get_album_description(artist_name: str, album_title: str) -> dict:
             }
             break
     else:
-        return False
+        raise TypeError("Альбом не найден")
 
+    return result
+
+def find_album_by_artist(artist_name: str, album_title: str) -> Union[tuple, bool]:
+    if ',' not in artist_name:
+        return (artist_name, album_title)
+    
+    result: tuple = tuple() 
+    names = [item.strip() for item in artist_name.split(',')]
+    
+    for name in names:
+        response = _search(f"{name} {album_title}")
+
+        if response.best and response.best.type == "album":
+            album: Album = response.best.result
+            result = (album.artists[0].name, album.title)
+            break
+    else:
+        return False
+        
     return result
 
 def validate_QLineEdit(field: QLineEdit):
@@ -52,7 +78,8 @@ def validate_QLineEdit(field: QLineEdit):
         return True
     else:
         field.clear()
-        return False
+    
+    return False
 
 def print_message(message):
     msgBox = QMessageBox()
