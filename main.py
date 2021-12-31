@@ -44,23 +44,12 @@ class MainWindow(QWidget):
             ]
         )
 
-        self.album_table.cellClicked.connect(self.get_current_album)
-
         self.album_table.setColumnHidden(2, True)
         self.album_table.setColumnHidden(3, True)
         self.album_table.setColumnHidden(4, True)
 
         self.album_table.horizontalHeader()\
             .setSectionResizeMode(QHeaderView.Stretch)
-
-    def get_current_album(self, row):
-        self._album_info = {
-            'artist': self.album_table.item(row, 0).text().strip(),
-            'title': self.album_table.item(row, 1).text().strip(),
-            'album_id': int(self.album_table.item(row, 2).text()),
-            'owner_id': int(self.album_table.item(row, 3).text()),
-            'access_hash': self.album_table.item(row, 4).text()
-        }
 
     def fill_album_table(self):
         vkaudio = VkAudio(VkSession().get_session())
@@ -83,19 +72,25 @@ class MainWindow(QWidget):
                 albumRow, 4, QTableWidgetItem(album['access_hash']))
 
     def download_button_click(self):
-        if self._album_info is not None:
-            result = find_album_by_artist(self._album_info['artist'], self._album_info['title'])
+        row = self.album_table.currentRow()
+        artist = self.album_table.item(row, 0).text().strip()
+        title = self.album_table.item(row, 1).text().strip()
         
-            if result:
-                self._album_info['artist'] = result[0]
-                self._album_info['title'] = result[1]
+        result = find_album_by_artist(artist, title)
                 
-                self.album_form = AlbumForm(self._album_info)
-                self.album_form.finished.connect(self.selected_album_handler)
-                self.album_form.show()
-            else:
-                print_message("Информация для данного альбома не найдена")
+        if result:
+            self.album_form = AlbumForm(
+                artist=result[0],
+                title=result[1],
+                album_id=int(self.album_table.item(row, 2).text()),
+                owner_id=int(self.album_table.item(row, 3).text()),
+                access_hash=self.album_table.item(row, 4).text()
+            )
             
+            self.album_form.finished.connect(self.selected_album_handler)
+            self.album_form.show()
+        else:
+            print_message("Информация для данного альбома не найдена")
 
     @pyqtSlot(VkAlbum)
     def selected_album_handler(self, value):

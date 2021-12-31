@@ -8,8 +8,6 @@ class VkSong:
     artist: str
     album: str
     title: str
-    cover_path: Path
-    album_path: Path
     track_code: str
     genre: str
     year: int

@@ -3,6 +3,7 @@
 # pylint: disable=import-error
 import contextlib
 import os
+import re
 import random
 import string
 from typing import Union
@@ -20,10 +21,23 @@ from entities.session import VkSession
 from entities.song import VkSong
 
 
-def _search(input: str):
+def _search(input_t: str):
     with contextlib.redirect_stderr(open(os.devnull, "w", encoding="UTF-8")):
         with contextlib.redirect_stdout(open(os.devnull, "w", encoding="UTF-8")):
-            return Client().search(sanitize_filename(input))
+            return Client().search(sanitize_filename(input_t))
+
+def _get_name(artist: str, title: str):
+    result = ""
+    
+    if "feat" in title or "при участии" in title:
+        result = title
+    elif "feat" in artist:
+        re_text = re.search(r'feat\.* .*', artist)
+        result = f"{title} ({re_text.group(0)})"
+    else:
+        result = title
+
+    return result
 
 def get_album_description(artist_name: str, album_title: str) -> dict:
     """ TODO: generate docstring """ 
@@ -102,12 +116,9 @@ def get_tracklist_iter(album: VkAlbum):
             track_num=i,
             artist=album.artist,
             album=album.title,
-            title=track['title'],
-            cover_path=album.cover_path,
-            album_path=album.album_path,
+            title=_get_name(track['artist'], track['title']),
             track_code="".join(random.choice(string.ascii_lowercase) for i in range(25)),
             genre=album.genre,
             year=album.year,
             url=track['url']
         )
-  

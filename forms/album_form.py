@@ -18,13 +18,13 @@ from utils import get_album_description, print_message, validate_QLineEdit
 class AlbumForm(QWidget):
     finished = pyqtSignal(VkAlbum)
 
-    def __init__(self, album_info: dict):
+    def __init__(self, artist: str, title: str, album_id: int, owner_id: int, access_hash: str):
         QWidget.__init__(self)
         uic.loadUi("designs/album.ui", self)
         
         self.result_button.clicked.connect(self.result_button_click)
 
-        album_dict = get_album_description(album_info['artist'], album_info['title'])
+        album_dict = get_album_description(artist, title)
         
         if album_dict:
             self.set_album_cover(album_dict['cover_url'])
@@ -36,9 +36,9 @@ class AlbumForm(QWidget):
                 genre=album_dict['genre'],
                 year=album_dict['year'],
                 cover_url=album_dict['cover_url'],
-                album_id=album_info['album_id'],
-                owner_id=album_info['owner_id'],
-                access_hash=album_info['access_hash']
+                album_id=album_id,
+                owner_id=owner_id,
+                access_hash=access_hash
             )
         else:
             print_message("Информация для данного альбома не найдена")
