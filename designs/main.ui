@@ -27,7 +27,24 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
-    <widget class="QTableWidget" name="album_table">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Артист:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QLineEdit" name="artist_lineedit"/>
+   </item>
+   <item row="0" column="2">
+    <widget class="QPushButton" name="search_button">
+     <property name="text">
+      <string>Искать</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="3">
+    <widget class="QTableWidget" name="albums_tablewidget">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
@@ -44,7 +61,7 @@
       <enum>QAbstractItemView::SelectRows</enum>
      </property>
      <property name="columnCount">
-      <number>5</number>
+      <number>6</number>
      </property>
      <attribute name="horizontalHeaderStretchLastSection">
       <bool>true</bool>
@@ -54,9 +71,10 @@
      <column/>
      <column/>
      <column/>
+     <column/>
     </widget>
    </item>
-   <item row="1" column="0">
+   <item row="2" column="0" colspan="3">
     <widget class="QPushButton" name="download_button">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Expanding">

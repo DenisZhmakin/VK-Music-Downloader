@@ -7,12 +7,13 @@ from PyQt5.QtWidgets import (QApplication, QHeaderView, QTableWidgetItem,
                              QWidget)
 from vk_api.audio import VkAudio
 
-from downloader import VkDownloader
 from entities.album import VkAlbum
 from entities.session import VkSession
 from forms.album_form import AlbumForm
 from forms.auth_form import AuthForm
-from utils import find_album_by_artist, print_message
+from threads.album_loader import AlbumLoader
+from threads.downloader import VkDownloader
+from utils import find_album_by_artist, print_message, validate_QLineEdit
 
 
 class MainWindow(QWidget):
@@ -23,58 +24,64 @@ class MainWindow(QWidget):
         self._album_info: dict = None
 
         self.download_button.clicked.connect(self.download_button_click)
+        self.search_button.clicked.connect(self.search_button_click)
         self.configure_table()
 
         if not Path(Path.home() / '.vkmusicload.conf').exists():
             self.auth = AuthForm()
             self.auth.setWindowFlag(Qt.WindowStaysOnTopHint)
-            self.auth.authorized_successfull.connect(self.fill_album_table)
             self.auth.show()
-        else:
-            self.fill_album_table()
 
     def configure_table(self):
-        self.album_table.setHorizontalHeaderLabels(
+        self.albums_tablewidget.setHorizontalHeaderLabels(
             [
                 "Исполнитель",
                 "Название альбома",
+                "Тип",
                 "album_id",
                 "owner_id",
                 "access_hash"
             ]
         )
 
-        self.album_table.setColumnHidden(2, True)
-        self.album_table.setColumnHidden(3, True)
-        self.album_table.setColumnHidden(4, True)
+        self.albums_tablewidget.setColumnHidden(3, True)
+        self.albums_tablewidget.setColumnHidden(4, True)
+        self.albums_tablewidget.setColumnHidden(5, True)
 
-        self.album_table.horizontalHeader()\
+        self.albums_tablewidget.horizontalHeader()\
             .setSectionResizeMode(QHeaderView.Stretch)
+      
+    def search_button_click(self):
+        self.albums_tablewidget.setRowCount(0)
+        
+        if validate_QLineEdit(self.artist_lineedit):
+            self.album_loader = AlbumLoader(self.artist_lineedit.text())
+            self.album_loader.album_get.connect(self.album_get_handler)
+            self.album_loader.start()
+    
+    @pyqtSlot(dict)
+    def album_get_handler(self, value):
+        albumRow = self.albums_tablewidget.rowCount()
+        
+        self.albums_tablewidget.insertRow(albumRow)
 
-    def fill_album_table(self):
-        vkaudio = VkAudio(VkSession().get_session())
-
-        self.album_table.setRowCount(0)
-
-        for album in vkaudio.get_albums_iter():
-            albumRow = self.album_table.rowCount()
-            self.album_table.insertRow(albumRow)
-
-            self.album_table.setItem(
-                albumRow, 0, QTableWidgetItem(album['artist']))
-            self.album_table.setItem(
-                albumRow, 1, QTableWidgetItem(album['title']))
-            self.album_table.setItem(
-                albumRow, 2, QTableWidgetItem(str(album['id'])))
-            self.album_table.setItem(
-                albumRow, 3, QTableWidgetItem(str(album['owner_id'])))
-            self.album_table.setItem(
-                albumRow, 4, QTableWidgetItem(album['access_hash']))
-
+        self.albums_tablewidget.setItem(
+            albumRow, 0, QTableWidgetItem(value['artist']))
+        self.albums_tablewidget.setItem(
+            albumRow, 1, QTableWidgetItem(value['title']))
+        self.albums_tablewidget.setItem(
+            albumRow, 2, QTableWidgetItem(value['type']))
+        self.albums_tablewidget.setItem(
+            albumRow, 3, QTableWidgetItem(str(value['id'])))
+        self.albums_tablewidget.setItem(
+            albumRow, 4, QTableWidgetItem(str(value['owner_id'])))
+        self.albums_tablewidget.setItem(
+            albumRow, 5, QTableWidgetItem(value['access_hash']))
+            
     def download_button_click(self):
-        row = self.album_table.currentRow()
-        artist = self.album_table.item(row, 0).text().strip()
-        title = self.album_table.item(row, 1).text().strip()
+        row = self.albums_tablewidget.currentRow()
+        artist = self.albums_tablewidget.item(row, 0).text().strip()
+        title = self.albums_tablewidget.item(row, 1).text().strip()
         
         result = find_album_by_artist(artist, title)
                 
@@ -82,9 +89,9 @@ class MainWindow(QWidget):
             self.album_form = AlbumForm(
                 artist=result[0],
                 title=result[1],
-                album_id=int(self.album_table.item(row, 2).text()),
-                owner_id=int(self.album_table.item(row, 3).text()),
-                access_hash=self.album_table.item(row, 4).text()
+                album_id=int(self.albums_tablewidget.item(row, 3).text()),
+                owner_id=int(self.albums_tablewidget.item(row, 4).text()),
+                access_hash=self.albums_tablewidget.item(row, 5).text()
             )
             
             self.album_form.finished.connect(self.selected_album_handler)
