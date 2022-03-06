@@ -50,7 +50,7 @@ def get_album_description(artist_name: str, album_title: str) -> dict:
     artist: Artist = response.best.result
 
     for album in artist.get_albums(page_size=100):
-        if fuzz.WRatio(album.title, album_title) > 92:
+        if fuzz.WRatio(album.title, album_title) > 95:
             result = {
                 'artist': artist.name,
                 'title': album.title,
