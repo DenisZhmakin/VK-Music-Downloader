@@ -1,0 +1,44 @@
+# pylint: disable=invalid-name
+import re
+import time
+
+from .utils import set_cookies_from_list
+
+from bs4 import BeautifulSoup
+from vk_api import VkApi
+
+DEFAULT_COOKIES = {
+        'version': 0,
+        'name': 'remixaudio_show_alert_today',
+        'value': '0',
+        'port': None,
+        'port_specified': False,
+        'domain': '.vk.com',
+        'domain_specified': True,
+        'domain_initial_dot': True,
+        'path': '/',
+        'path_specified': True,
+        'secure': True,
+        'expires': None,
+        'discard': False,
+        'comment': None,
+        'comment_url': None,
+        'rfc2109': False,
+        'rest': {}
+}
+
+class VkAudioNG:
+    """[summary]
+    """
+    def __init__(self, vk: VkApi, convert_m3u8_links=True):
+        self.vk = vk
+
+        self.user_id = vk.method('users.get')[0]['id']
+        self.convert_m3u8_links = convert_m3u8_links
+
+        # set_cookies_from_list(self.vk.http.cookies, DEFAULT_COOKIES)
+
+        self.vk.http.get('https://vk.com/')  # load cookies
+          
+    
+
