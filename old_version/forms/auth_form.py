@@ -11,8 +11,8 @@ from utils import print_message, validate_QLineEdit
 
 
 class AuthForm(QWidget):
-    authorized_successfull = pyqtSignal() 
-    
+    authorized_successfull = pyqtSignal()
+
     def __init__(self):
         QWidget.__init__(self)
         uic.loadUi("designs/auth.ui", self)
