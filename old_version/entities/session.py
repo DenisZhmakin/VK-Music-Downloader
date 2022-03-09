@@ -12,14 +12,14 @@ class VkSession:
             cls.instance = super(VkSession, cls).__new__(cls)
 
             with open(Path.home() / '.vkmusicload.conf', "r") as read_file:
-                    data = json.load(read_file)
+                data = json.load(read_file)
 
             session = VkApi(data['login'], data['password'])
 
             try:
                 session.auth(token_only=True)
                 cls._vk_session = session
-            except:
+            except AuthError:
                 cls._vk_session = None
 
         return cls.instance

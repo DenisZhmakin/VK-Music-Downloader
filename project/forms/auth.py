@@ -52,13 +52,9 @@ class AuthWindow(QWidget):
 
     @pyqtSlot(str)
     def authentication_with_twoFA(self, value):
-        def _auth_handler():
-            return value, True
-
         session = VkApi(
-            self.login_line.text(),
-            self.password_line.text(),
-            auth_handler=_auth_handler
+            self.login_line.text(), self.password_line.text(),
+            auth_handler=lambda: (value, True)
         )
 
         try:
@@ -66,13 +62,11 @@ class AuthWindow(QWidget):
             self.save_auth_data()
             self.authorized_successfull.emit()
             self.close()
-        except AuthError:
-            self.login_line.clear()
+        except BadPassword:
+            print_message("Некорректный пароль. Введите правильный")
             self.password_line.clear()
-
-            print_message(
-                "Авторизация не удалась.\nВозможно, не правильный логин или пароль."
-            )
+        except AuthError:
+            print_message("Код двухфакторной аутентификации не корректен.")
 
     def save_auth_data(self):
         user_data = {
