@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QCheckBox, QWidget
 from utils import print_message, validate_QLineEdit
 from vk_api.vk_api import AuthError, BadPassword, VkApi
 
-from forms.twoFA import TwoFA
+from forms.tFA import TwoFactorAuth
 
 
 class AuthWindow(QWidget):
@@ -29,7 +29,7 @@ class AuthWindow(QWidget):
             return
 
         if self.tFA_checkbox.isChecked():
-            self.two_fa_window = TwoFA()
+            self.two_fa_window = TwoFactorAuth()
             self.two_fa_window.setWindowFlag(Qt.WindowStaysOnTopHint)
             self.two_fa_window.code_received.connect(self.authentication_with_twoFA)
             self.two_fa_window.show()

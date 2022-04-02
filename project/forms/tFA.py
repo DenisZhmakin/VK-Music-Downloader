@@ -4,12 +4,12 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QIntValidator
 
 
-class TwoFA(QWidget):
+class TwoFactorAuth(QWidget):
     code_received = pyqtSignal(str)
 
     def __init__(self):
         QWidget.__init__(self)
-        uic.loadUi("designs/twoFA.ui", self)
+        uic.loadUi("designs/tFA.ui", self)
 
         self.ok_button.clicked.connect(self.ok_button_click)
         self.code_lineedit.setValidator(

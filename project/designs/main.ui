@@ -10,10 +10,22 @@
     <height>610</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>980</width>
+    <height>610</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>980</width>
+    <height>610</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>VK-Music-Downloader</string>
   </property>
-  <widget class="QTableWidget" name="tableWidget">
+  <widget class="QTableWidget" name="albums_table">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -23,7 +35,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QGraphicsView" name="graphicsView">
+  <widget class="QGraphicsView" name="albums_cover_view">
    <property name="geometry">
     <rect>
      <x>670</x>
@@ -39,13 +51,13 @@
     </sizepolicy>
    </property>
   </widget>
-  <widget class="QLineEdit" name="lineEdit_2">
+  <widget class="QLineEdit" name="album_title_lineedit">
    <property name="geometry">
     <rect>
      <x>670</x>
      <y>400</y>
      <width>301</width>
-     <height>31</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="inputMask">
@@ -68,16 +80,16 @@
     </rect>
    </property>
    <property name="text">
-    <string>Начать загрузку!</string>
+    <string>Загрузить выбранный альбом</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="lineEdit_3">
+  <widget class="QLineEdit" name="artist_album_lineedit">
    <property name="geometry">
     <rect>
      <x>670</x>
      <y>440</y>
      <width>301</width>
-     <height>31</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="text">
@@ -87,26 +99,26 @@
     <string>Исполнитель альбома</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="lineEdit_4">
+  <widget class="QLineEdit" name="genre_album_lineedit">
    <property name="geometry">
     <rect>
      <x>670</x>
      <y>520</y>
      <width>301</width>
-     <height>31</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="placeholderText">
     <string>Жанр данного альбома</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="lineEdit_5">
+  <widget class="QLineEdit" name="year_release_lineedit">
    <property name="geometry">
     <rect>
      <x>670</x>
      <y>480</y>
      <width>301</width>
-     <height>31</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="placeholderText">
@@ -126,7 +138,7 @@
     <string>Найти</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="search_line">
+  <widget class="QLineEdit" name="search_lineedit">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -151,7 +163,7 @@
     <enum>Qt::LogicalMoveStyle</enum>
    </property>
   </widget>
-  <widget class="QGroupBox" name="groupBox">
+  <widget class="QGroupBox" name="source_groupbox">
    <property name="geometry">
     <rect>
      <x>670</x>
@@ -163,7 +175,7 @@
    <property name="title">
     <string/>
    </property>
-   <widget class="QRadioButton" name="radioButton">
+   <widget class="QRadioButton" name="vk_radiobutton">
     <property name="geometry">
      <rect>
       <x>30</x>
@@ -176,7 +188,7 @@
      <string>Вконтакте</string>
     </property>
    </widget>
-   <widget class="QRadioButton" name="radioButton_2">
+   <widget class="QRadioButton" name="ym_radiobutton">
     <property name="geometry">
      <rect>
       <x>140</x>
